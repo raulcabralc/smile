@@ -33,7 +33,7 @@ export class ClinicRepository {
       TableName: DynamoTable.SmileTable,
       Key: {
         pk: `CLINIC#${id}`,
-        fk: `METADATA#${id}`,
+        sk: `METADATA#${id}`,
       },
     });
 
