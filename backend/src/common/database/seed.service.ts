@@ -91,14 +91,15 @@ export class SeedService implements OnModuleInit {
     const userCommand = new PutCommand({
       Item: {
         pk: `CLINIC#${clinicId}`,
-        sk: `USER#admin@smile.com`,
+        sk: `USER#${adminId}`,
         id: adminId,
-        clinicId: clinicId,
+        clinic_id: clinicId,
         name: "Admin Smile",
         email: "admin@smile.com",
         password: passwordHash,
         role: "ADMIN",
-        createdAt: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       },
       TableName: tableName,
     });
@@ -108,9 +109,11 @@ export class SeedService implements OnModuleInit {
         pk: `CLINIC#${clinicId}`,
         sk: `METADATA#${clinicId}`,
         id: clinicId,
+        owner_id: adminId,
         name: "VITA Odontologia",
         cnpj: "12.345.678/0001-90",
-        createdAt: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       },
       TableName: tableName,
     });

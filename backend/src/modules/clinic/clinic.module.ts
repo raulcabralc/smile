@@ -5,7 +5,8 @@ import { DynamoDbProvider } from "../../common/providers/dynamodb.provider";
 import { ClinicController } from "./clinic.controller";
 
 @Module({
-  providers: [DynamoDbProvider, ClinicService, ClinicRepository],
+  providers: [ClinicService, ClinicRepository],
   controllers: [ClinicController],
+  exports: [ClinicService],
 })
 export class ClinicModule {}

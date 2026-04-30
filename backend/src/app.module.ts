@@ -3,6 +3,7 @@ import { AppController } from "./app.controller";
 import { ConfigModule } from "@nestjs/config";
 import { DatabaseModule } from "./common/database/database.module";
 import { ClinicModule } from "./modules/clinic/clinic.module";
+import { UserModule } from "./modules/user/user.module";
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ClinicModule } from "./modules/clinic/clinic.module";
 
     DatabaseModule,
     ClinicModule,
+    UserModule,
   ],
   providers: [],
   controllers: [AppController],

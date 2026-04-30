@@ -14,7 +14,7 @@ export class ClinicRepository {
     @Inject(DYNAMO_DB_CLIENT) private readonly ddb: DynamoDBDocumentClient,
   ) {}
 
-  async findAll(): Promise<ClinicEntity[]> {
+  async findAll(): Promise<ClinicEntity[] | null> {
     const command = new ScanCommand({
       TableName: DynamoTable.SmileTable,
       FilterExpression: "begins_with(sk, :metadata)",
@@ -25,20 +25,24 @@ export class ClinicRepository {
 
     const result = await this.ddb.send(command);
 
+    if (!result.Items) return null;
+
     return result.Items as ClinicEntity[];
   }
 
-  async findById(id: string): Promise<ClinicEntity> {
+  async findOne(clinicId: string): Promise<ClinicEntity | null> {
     const command = new GetCommand({
       TableName: DynamoTable.SmileTable,
       Key: {
-        pk: `CLINIC#${id}`,
-        sk: `METADATA#${id}`,
+        pk: `CLINIC#${clinicId}`,
+        sk: `METADATA#${clinicId}`,
       },
     });
 
     const result = await this.ddb.send(command);
 
-    return result.Item as ClinicEntity;
+    if (!result.Item) return null;
+
+    return new ClinicEntity(result.Item as ClinicEntity);
   }
 }

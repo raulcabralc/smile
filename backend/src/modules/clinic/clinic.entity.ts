@@ -10,12 +10,14 @@ export class ClinicEntity {
 
   name!: string;
   cnpj!: string;
-  system_plan!: SystemPlan;
+  systemPlan!: SystemPlan;
   phone!: string;
   address!: Address;
   markers!: Marker[];
   image_url!: string;
-  created_at!: string;
+
+  createdAt!: string;
+  updatedAt!: string;
 
   constructor(partial: Partial<ClinicEntity>) {
     Object.assign(this, partial);
@@ -23,6 +25,14 @@ export class ClinicEntity {
     if (this.id) {
       this.pk = `CLINIC#${this.id}`;
       this.sk = `METADATA#${this.id}`;
+
+      if (!this.createdAt) {
+        this.createdAt = new Date().toISOString();
+      }
+
+      if (!this.updatedAt) {
+        this.updatedAt = this.createdAt;
+      }
     }
   }
 }
