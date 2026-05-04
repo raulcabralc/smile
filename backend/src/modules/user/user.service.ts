@@ -3,15 +3,17 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ServiceUnavailableException,
 } from "@nestjs/common";
 import { UserRepository } from "./user.repository";
 import { UserEntity } from "./user.entity";
 import { CreateUserDTO } from "./types/dtos/create-user.dto";
 import { ClinicService } from "../clinic/clinic.service";
+import * as bcrypt from "bcrypt";
+import { UserRole } from "./types/enums/roles.enum";
 
 @Injectable()
 export class UserService {
-  private readonly logger = new Logger();
   constructor(
     private readonly userRepository: UserRepository,
     private readonly clinicService: ClinicService,
@@ -36,10 +38,6 @@ export class UserService {
     createUserDTO: CreateUserDTO,
   ): Promise<UserEntity> {
     const clinicExists = await this.clinicService.findOne(clinicId);
-    const emailExists = await this.userRepository.findByEmail(
-      clinicId,
-      createUserDTO.email,
-    );
 
     if (!clinicExists) {
       throw new NotFoundException(
@@ -47,9 +45,42 @@ export class UserService {
       );
     }
 
+    const emailExists = await this.userRepository.findByEmail(
+      clinicId,
+      createUserDTO.email,
+    );
+
     if (emailExists)
       throw new ConflictException(
         `The email ${createUserDTO.email} is already registered.`,
       );
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(createUserDTO.password, salt);
+
+    const newUser = new UserEntity({
+      ...createUserDTO,
+      id: crypto.randomUUID(),
+      clinicId: clinicId,
+      password: hashedPassword,
+      isActive: createUserDTO.isActive ?? true,
+    });
+
+    return await this.userRepository.create(newUser);
+  }
+
+  async delete(clinicId: string, id: string): Promise<UserEntity> {
+    const userExists = await this.userRepository.findOne(clinicId, id);
+
+    if (!userExists) throw new NotFoundException("User not found.");
+
+    const result = await this.userRepository.delete(clinicId, id);
+
+    if (!result)
+      throw new ServiceUnavailableException(
+        "Unexpected database error. Please, try again.",
+      );
+
+    return new UserEntity(userExists);
   }
 }

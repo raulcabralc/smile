@@ -8,13 +8,15 @@ export class ClinicEntity {
 
   id!: string;
 
+  ownerId!: string;
+
   name!: string;
   cnpj!: string;
   systemPlan!: SystemPlan;
   phone!: string;
   address!: Address;
   markers!: Marker[];
-  image_url!: string;
+  imageUrl!: string;
 
   createdAt!: string;
   updatedAt!: string;

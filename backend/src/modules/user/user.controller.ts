@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { UserEntity } from "./user.entity";
 import { CreateUserDTO } from "./types/dtos/create-user.dto";
@@ -7,16 +7,17 @@ import { CreateUserDTO } from "./types/dtos/create-user.dto";
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get("/:clinicId")
-  async findAll(@Param("clinicId") clinicId: string): Promise<UserEntity[]> {
+  @Get("/")
+  async findAll(): Promise<UserEntity[]> {
+    const clinicId = "demo-clinic-123";
+
     return await this.userService.findAll(clinicId);
   }
 
-  @Get("/:clinicId/:id")
-  async findOne(
-    @Param("clinicId") clinicId: string,
-    @Param("id") id: string,
-  ): Promise<UserEntity> {
+  @Get("/:id")
+  async findOne(@Param("id") id: string): Promise<UserEntity> {
+    const clinicId = "demo-clinic-123";
+
     return await this.userService.findOne(clinicId, id);
   }
 
@@ -25,5 +26,12 @@ export class UserController {
     const clinicId = "demo-clinic-123";
 
     return await this.userService.create(clinicId, createUserDTO);
+  }
+
+  @Delete("/:id")
+  async delete(@Param("id") id: string): Promise<UserEntity> {
+    const clinicId = "demo-clinic-123";
+
+    return await this.userService.delete(clinicId, id);
   }
 }

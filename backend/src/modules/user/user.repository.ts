@@ -1,8 +1,10 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { DYNAMO_DB_CLIENT } from "../../common/providers/dynamodb.provider";
 import {
+  DeleteCommand,
   DynamoDBDocumentClient,
   GetCommand,
+  PutCommand,
   QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { DynamoTable } from "../../common/types/enums/dynamo-table.enum";
@@ -47,19 +49,56 @@ export class UserRepository {
     return new UserEntity(result.Item as UserEntity);
   }
 
-  ///
+  async create(newUser: UserEntity): Promise<UserEntity> {
+    const command = new PutCommand({
+      TableName: DynamoTable.SmileTable,
+      Item: newUser,
+    });
 
-  async findByEmail(clinicId: string, email: string): Promise<boolean> {
-    const command = new GetCommand({
+    await this.ddb.send(command);
+
+    return new UserEntity(newUser);
+  }
+
+  async delete(clinicId: string, id: string): Promise<boolean | null> {
+    const command = new DeleteCommand({
       TableName: DynamoTable.SmileTable,
       Key: {
         pk: `CLINIC#${clinicId}`,
-        email: email,
+        sk: `USER#${id}`,
       },
     });
 
     const result = await this.ddb.send(command);
 
-    return !!result;
+    if (!result) return null;
+
+    return true;
+  }
+
+  ///
+
+  async findByEmail(
+    clinicId: string,
+    email: string,
+  ): Promise<UserEntity | null> {
+    const command = new QueryCommand({
+      TableName: DynamoTable.SmileTable,
+      IndexName: "EmailIndex",
+      KeyConditionExpression: "email = :email",
+      FilterExpression: "clinicId = :clinicId",
+      ExpressionAttributeValues: {
+        ":clinicId": clinicId,
+        ":email": email,
+      },
+    });
+
+    const result = await this.ddb.send(command);
+
+    if (!result.Items || result.Items.length === 0) {
+      return null;
+    }
+
+    return new UserEntity(result.Items[0] as UserEntity);
   }
 }
