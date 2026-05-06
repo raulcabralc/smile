@@ -60,6 +60,17 @@ export class UserRepository {
     return new UserEntity(newUser);
   }
 
+  async update(updatedUser: UserEntity): Promise<UserEntity> {
+    const command = new PutCommand({
+      TableName: DynamoTable.SmileTable,
+      Item: updatedUser,
+    });
+
+    await this.ddb.send(command);
+
+    return new UserEntity(updatedUser);
+  }
+
   async delete(clinicId: string, id: string): Promise<boolean | null> {
     const command = new DeleteCommand({
       TableName: DynamoTable.SmileTable,

@@ -1,3 +1,4 @@
+import { Exclude } from "class-transformer";
 import { UserRole } from "./types/enums/roles.enum";
 
 export class UserEntity {
@@ -10,7 +11,10 @@ export class UserEntity {
 
   name!: string;
   email!: string;
+
+  @Exclude()
   password?: string;
+
   role!: UserRole;
   isActive!: boolean;
   cro?: string;
