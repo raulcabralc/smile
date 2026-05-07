@@ -107,23 +107,4 @@ export class UserRepository {
 
     return new UserEntity(result.Items[0] as UserEntity);
   }
-
-  async findByEmailWithPassword(email: string): Promise<UserEntity | null> {
-    const command = new QueryCommand({
-      TableName: DynamoTable.SmileTable,
-      IndexName: "EmailIndex",
-      KeyConditionExpression: "email = :email",
-      ExpressionAttributeValues: {
-        ":email": email,
-      },
-    });
-
-    const result = await this.ddb.send(command);
-
-    if (!result.Items || result.Items.length === 0) {
-      return null;
-    }
-
-    return new UserEntity(result.Items[0] as UserEntity);
-  }
 }

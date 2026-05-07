@@ -11,6 +11,9 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
       transform: true,
       errorHttpStatusCode: 422,
+      transformOptions: {
+        exposeUnsetFields: false,
+      },
     }),
   );
 

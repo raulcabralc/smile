@@ -109,7 +109,7 @@ export class UserService {
       }
     }
 
-    if (updateUserDTO.email) {
+    if (updateUserDTO.email && updateUserDTO.email !== userExists.email) {
       const emailExists = await this.userRepository.findByEmail(
         updateUserDTO.email,
       );
@@ -128,18 +128,17 @@ export class UserService {
       hashedPassword = await bcrypt.hash(updateUserDTO.password, salt);
     }
 
+    const cleanUpdateData = Object.fromEntries(
+      Object.entries(updateUserDTO).filter(([_, value]) => value !== undefined),
+    );
+
     const updatedUser = new UserEntity({
+      ...userExists,
+      ...cleanUpdateData,
       id: userExists.id,
-      clinicId: user.clinicId,
-      name: updateUserDTO.name || userExists.name,
-      email: updateUserDTO.email || userExists.email,
+      clinicId: userExists.clinicId,
       password: hashedPassword,
-      role: updateUserDTO.role || userExists.role,
-      isActive: updateUserDTO.isActive ?? userExists.isActive,
-      cro: updateUserDTO.cro || userExists.cro,
-      createdAt: userExists.createdAt,
       updatedAt: new Date().toISOString(),
-      ...updateUserDTO,
     });
 
     return await this.userRepository.update(updatedUser);
@@ -162,8 +161,8 @@ export class UserService {
 
   ///
 
-  async findByEmailWithPassword(email: string): Promise<UserEntity> {
-    const result = await this.userRepository.findByEmailWithPassword(email);
+  async findByEmail(email: string): Promise<UserEntity> {
+    const result = await this.userRepository.findByEmail(email);
 
     if (!result) throw new NotFoundException("User not found.");
 
