@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { DYNAMO_DB_CLIENT } from "../../common/providers/dynamodb.provider";
 import {
   DeleteCommand,

@@ -2,7 +2,6 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
-  Logger,
   NotFoundException,
   ServiceUnavailableException,
 } from "@nestjs/common";
@@ -13,22 +12,21 @@ import { ClinicService } from "../clinic/clinic.service";
 import * as bcrypt from "bcrypt";
 import { UpdateUserDTO } from "./types/dtos/update-user.dto";
 import { UserRole } from "./types/enums/roles.enum";
+import { UserPayload } from "../auth/types/interfaces/user-payload.interface";
 
 @Injectable()
 export class UserService {
-  private logger = new Logger();
-
   constructor(
     private readonly userRepository: UserRepository,
     private readonly clinicService: ClinicService,
   ) {}
 
-  async findAll(clinicId: string): Promise<UserEntity[]> {
-    return await this.userRepository.findAll(clinicId);
+  async findAll(user: UserPayload): Promise<UserEntity[]> {
+    return await this.userRepository.findAll(user.clinicId);
   }
 
-  async findOne(clinicId: string, id: string): Promise<UserEntity> {
-    const result = await this.userRepository.findOne(clinicId, id);
+  async findOne(user: UserPayload, id: string): Promise<UserEntity> {
+    const result = await this.userRepository.findOne(user.clinicId, id);
 
     if (!result) {
       throw new NotFoundException("User not found.");
@@ -38,15 +36,14 @@ export class UserService {
   }
 
   async create(
-    user: { id: string; role: UserRole; email: string },
-    clinicId: string,
+    user: UserPayload,
     createUserDTO: CreateUserDTO,
   ): Promise<UserEntity> {
-    const clinicExists = await this.clinicService.findOne(clinicId);
+    const clinicExists = await this.clinicService.findOne(user.clinicId);
 
     if (!clinicExists) {
       throw new NotFoundException(
-        `The clinic with id ${clinicId} does not exist.`,
+        `The clinic with id ${user.clinicId} does not exist.`,
       );
     }
 
@@ -71,7 +68,7 @@ export class UserService {
     const newUser = new UserEntity({
       ...createUserDTO,
       id: crypto.randomUUID(),
-      clinicId: clinicId,
+      clinicId: user.clinicId,
       password: hashedPassword,
       isActive: createUserDTO.isActive ?? true,
     });
@@ -80,8 +77,7 @@ export class UserService {
   }
 
   async update(
-    user: { id: string; role: UserRole; email: string },
-    clinicId: string,
+    user: UserPayload,
     id: string,
     updateUserDTO: UpdateUserDTO,
   ): Promise<UserEntity> {
@@ -89,15 +85,15 @@ export class UserService {
       throw new ForbiddenException("Cannot update your own role.");
     }
 
-    const clinicExists = await this.clinicService.findOne(clinicId);
+    const clinicExists = await this.clinicService.findOne(user.clinicId);
 
     if (!clinicExists) {
       throw new NotFoundException(
-        `The clinic with id ${clinicId} does not exist.`,
+        `The clinic with id ${user.clinicId} does not exist.`,
       );
     }
 
-    const userExists = await this.userRepository.findOne(clinicId, id);
+    const userExists = await this.userRepository.findOne(user.clinicId, id);
 
     if (!userExists) throw new NotFoundException("User not found.");
 
@@ -134,7 +130,7 @@ export class UserService {
 
     const updatedUser = new UserEntity({
       id: userExists.id,
-      clinicId,
+      clinicId: user.clinicId,
       name: updateUserDTO.name || userExists.name,
       email: updateUserDTO.email || userExists.email,
       password: hashedPassword,
@@ -149,12 +145,12 @@ export class UserService {
     return await this.userRepository.update(updatedUser);
   }
 
-  async delete(clinicId: string, id: string): Promise<UserEntity> {
-    const userExists = await this.userRepository.findOne(clinicId, id);
+  async delete(user: UserPayload, id: string): Promise<UserEntity> {
+    const userExists = await this.userRepository.findOne(user.clinicId, id);
 
     if (!userExists) throw new NotFoundException("User not found.");
 
-    const result = await this.userRepository.delete(clinicId, id);
+    const result = await this.userRepository.delete(user.clinicId, id);
 
     if (!result)
       throw new ServiceUnavailableException(
@@ -168,8 +164,6 @@ export class UserService {
 
   async findByEmailWithPassword(email: string): Promise<UserEntity> {
     const result = await this.userRepository.findByEmailWithPassword(email);
-
-    this.logger.log(result);
 
     if (!result) throw new NotFoundException("User not found.");
 

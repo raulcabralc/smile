@@ -6,62 +6,71 @@ import {
   Param,
   Post,
   Put,
+  Req,
+  UseGuards,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { UserEntity } from "./user.entity";
 import { CreateUserDTO } from "./types/dtos/create-user.dto";
 import { UpdateUserDTO } from "./types/dtos/update-user.dto";
-import { UserRole } from "./types/enums/roles.enum";
+import { JwtAuthGuard } from "../auth/guards/jwt.guard";
+import { confirmUser } from "../../common/utils/confirm-user.util";
+import type { Request } from "express";
 
 @Controller("/user")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get("/")
-  async findAll(): Promise<UserEntity[]> {
-    const clinicId = "demo-clinic-123";
+  async findAll(@Req() req: Request): Promise<UserEntity[]> {
+    const user = confirmUser(req);
 
-    return await this.userService.findAll(clinicId);
+    return await this.userService.findAll(user);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get("/:id")
-  async findOne(@Param("id") id: string): Promise<UserEntity> {
-    const clinicId = "demo-clinic-123";
+  async findOne(
+    @Req() req: Request,
+    @Param("id") id: string,
+  ): Promise<UserEntity> {
+    const user = confirmUser(req);
 
-    return await this.userService.findOne(clinicId, id);
+    return await this.userService.findOne(user, id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post("/create")
-  async create(@Body() createUserDTO: CreateUserDTO): Promise<UserEntity> {
-    const clinicId = "demo-clinic-123";
-    const user = {
-      id: "0000-0000-0000-0000",
-      role: UserRole.ADMIN,
-      email: "admin@smile.com",
-    };
+  async create(
+    @Req() req: Request,
+    @Body() createUserDTO: CreateUserDTO,
+  ): Promise<UserEntity> {
+    const user = confirmUser(req);
 
-    return await this.userService.create(user, clinicId, createUserDTO);
+    return await this.userService.create(user, createUserDTO);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put("/update/:id")
   async update(
+    @Req() req: Request,
     @Param("id") id: string,
     @Body() updateUserDTO: UpdateUserDTO,
   ): Promise<UserEntity> {
-    const clinicId = "demo-clinic-123";
-    const user = {
-      id: "0000-0000-0000-0000",
-      role: UserRole.ADMIN,
-      email: "admin@smile.com",
-    };
+    const user = confirmUser(req);
 
-    return await this.userService.update(user, clinicId, id, updateUserDTO);
+    return await this.userService.update(user, id, updateUserDTO);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete("/:id")
-  async delete(@Param("id") id: string): Promise<UserEntity> {
-    const clinicId = "demo-clinic-123";
+  async delete(
+    @Req() req: Request,
+    @Param("id") id: string,
+  ): Promise<UserEntity> {
+    const user = confirmUser(req);
 
-    return await this.userService.delete(clinicId, id);
+    return await this.userService.delete(user, id);
   }
 }

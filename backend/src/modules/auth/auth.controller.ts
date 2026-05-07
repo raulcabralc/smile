@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Logger,
   Post,
   Req,
   UnauthorizedException,
@@ -17,8 +16,6 @@ import { confirmUser } from "../../common/utils/confirm-user.util";
 
 @Controller("/auth")
 export class AuthController {
-  private logger = new Logger();
-
   constructor(private readonly authService: AuthService) {}
 
   @Post("/login")
@@ -37,8 +34,6 @@ export class AuthController {
   @Get("/me")
   async me(@Req() req: Request) {
     const user = confirmUser(req);
-
-    this.logger.log(user);
 
     return await this.authService.me(user);
   }

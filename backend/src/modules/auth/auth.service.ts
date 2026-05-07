@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { UserService } from "../user/user.service";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
@@ -6,8 +6,6 @@ import { UserPayload } from "./types/interfaces/user-payload.interface";
 
 @Injectable()
 export class AuthService {
-  private logger = new Logger();
-
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
@@ -38,8 +36,6 @@ export class AuthService {
   }
 
   async me(user: UserPayload) {
-    this.logger.log({ clinicId: user.clinicId, id: user.id });
-
-    return await this.userService.findOne(user.clinicId, user.id);
+    return await this.userService.findOne(user, user.id);
   }
 }
