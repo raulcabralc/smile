@@ -8,5 +8,6 @@ import { ClinicModule } from "../clinic/clinic.module";
   imports: [ClinicModule],
   providers: [UserRepository, UserService],
   controllers: [UserController],
+  exports: [UserService],
 })
 export class UserModule {}

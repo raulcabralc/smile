@@ -57,7 +57,6 @@ export class UserService {
     }
 
     const emailExists = await this.userRepository.findByEmail(
-      clinicId,
       createUserDTO.email,
     );
 
@@ -116,7 +115,6 @@ export class UserService {
 
     if (updateUserDTO.email) {
       const emailExists = await this.userRepository.findByEmail(
-        clinicId,
         updateUserDTO.email,
       );
 
@@ -164,5 +162,17 @@ export class UserService {
       );
 
     return new UserEntity(userExists);
+  }
+
+  ///
+
+  async findByEmailWithPassword(email: string): Promise<UserEntity> {
+    const result = await this.userRepository.findByEmailWithPassword(email);
+
+    this.logger.log(result);
+
+    if (!result) throw new NotFoundException("User not found.");
+
+    return result;
   }
 }

@@ -37,5 +37,11 @@ export class UserEntity {
         this.updatedAt = this.createdAt;
       }
     }
+
+    if (this.pk && !this.clinicId) {
+      const clId = this.pk.split("#")[1];
+
+      this.clinicId = clId;
+    }
   }
 }
