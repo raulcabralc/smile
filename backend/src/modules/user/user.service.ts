@@ -22,14 +22,13 @@ export class UserService {
   ) {}
 
   async findAll(user: UserPayload): Promise<UserEntity[]> {
-    const result = await this.userRepository.findAll(user.clinicId);
-
-    if (!result)
+    try {
+      return await this.userRepository.findAll(user.clinicId);
+    } catch {
       throw new ServiceUnavailableException(
-        "Unexpected database error. Please, try again.",
+        "Unexpected error. Please, try again.",
       );
-
-    return result;
+    }
   }
 
   async findOne(user: UserPayload, id: string): Promise<UserEntity> {
@@ -80,7 +79,13 @@ export class UserService {
       isActive: createUserDTO.isActive ?? true,
     });
 
-    return await this.userRepository.create(newUser);
+    try {
+      return await this.userRepository.create(newUser);
+    } catch {
+      throw new ServiceUnavailableException(
+        "Unexpected error. Please, try again.",
+      );
+    }
   }
 
   async update(
@@ -148,7 +153,13 @@ export class UserService {
       updatedAt: new Date().toISOString(),
     });
 
-    return await this.userRepository.update(updatedUser);
+    try {
+      return await this.userRepository.update(updatedUser);
+    } catch {
+      throw new ServiceUnavailableException(
+        "Unexpected error. Please, try again.",
+      );
+    }
   }
 
   async delete(user: UserPayload, id: string): Promise<UserEntity> {
@@ -156,12 +167,13 @@ export class UserService {
 
     if (!userExists) throw new NotFoundException("User not found.");
 
-    const result = await this.userRepository.delete(user.clinicId, id);
-
-    if (!result)
+    try {
+      await this.userRepository.delete(user.clinicId, id);
+    } catch {
       throw new ServiceUnavailableException(
-        "Unexpected database error. Please, try again.",
+        "Unexpected error. Please, try again.",
       );
+    }
 
     return new UserEntity(userExists);
   }
