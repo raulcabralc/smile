@@ -15,7 +15,7 @@ export class ClinicRepository {
     @Inject(DYNAMO_DB_CLIENT) private readonly ddb: DynamoDBDocumentClient,
   ) {}
 
-  async findAll(): Promise<ClinicEntity[] | null> {
+  async findAll(): Promise<ClinicEntity[]> {
     const command = new ScanCommand({
       TableName: DynamoTable.SmileTable,
       FilterExpression: "begins_with(sk, :metadata)",
@@ -25,8 +25,6 @@ export class ClinicRepository {
     });
 
     const result = await this.ddb.send(command);
-
-    if (!result.Items) return null;
 
     return result.Items?.map(
       (item) => new ClinicEntity(item as ClinicEntity),

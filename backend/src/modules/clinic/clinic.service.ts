@@ -23,14 +23,13 @@ export class ClinicService {
   ) {}
 
   async findAll(): Promise<ClinicEntity[]> {
-    const result = await this.clinicRepository.findAll();
-
-    if (!result)
+    try {
+      return await this.clinicRepository.findAll();
+    } catch {
       throw new ServiceUnavailableException(
-        "An unexpected error occured. Try again.",
+        "An unexpected error occured. Please, try again.",
       );
-
-    return result;
+    }
   }
 
   async findOne(id: string): Promise<ClinicEntity> {
@@ -70,12 +69,13 @@ export class ClinicService {
       createdAt: new Date().toISOString(),
     });
 
-    const userCreated = await this.userRepository.create(newUser);
-
-    if (!userCreated)
+    try {
+      await this.userRepository.create(newUser);
+    } catch {
       throw new ServiceUnavailableException(
-        "Unexpected database error. Please, try again.",
+        "An unexpected error occured. Please, try again.",
       );
+    }
 
     //
 
@@ -86,12 +86,13 @@ export class ClinicService {
       createdAt: new Date().toISOString(),
     });
 
-    const clinicCreated = await this.clinicRepository.create(newClinic);
-
-    if (!clinicCreated)
+    try {
+      await this.clinicRepository.create(newClinic);
+    } catch {
       throw new ServiceUnavailableException(
-        "Unexpected database error. Please, try again.",
+        "An unexpected error occured. Please, try again.",
       );
+    }
 
     return {
       clinic: newClinic,
