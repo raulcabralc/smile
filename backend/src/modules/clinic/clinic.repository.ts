@@ -3,6 +3,7 @@ import { DYNAMO_DB_CLIENT } from "../../common/providers/dynamodb.provider";
 import {
   DynamoDBDocumentClient,
   GetCommand,
+  PutCommand,
   ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { ClinicEntity } from "./clinic.entity";
@@ -27,7 +28,9 @@ export class ClinicRepository {
 
     if (!result.Items) return null;
 
-    return result.Items as ClinicEntity[];
+    return result.Items?.map(
+      (item) => new ClinicEntity(item as ClinicEntity),
+    ) as ClinicEntity[];
   }
 
   async findOne(clinicId: string): Promise<ClinicEntity | null> {
@@ -44,5 +47,18 @@ export class ClinicRepository {
     if (!result.Item) return null;
 
     return new ClinicEntity(result.Item as ClinicEntity);
+  }
+
+  async create(newClinic: ClinicEntity): Promise<ClinicEntity | null> {
+    const command = new PutCommand({
+      TableName: DynamoTable.SmileTable,
+      Item: newClinic,
+    });
+
+    const result = await this.ddb.send(command);
+
+    if (!result) return null;
+
+    return new ClinicEntity(newClinic);
   }
 }

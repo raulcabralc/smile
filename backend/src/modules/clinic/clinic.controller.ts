@@ -1,6 +1,7 @@
-import { Controller, Get, Param } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { ClinicService } from "./clinic.service";
 import { ClinicEntity } from "./clinic.entity";
+import { SetupDTO } from "./types/dtos/setup.dto";
 
 @Controller("/clinic")
 export class ClinicController {
@@ -12,7 +13,12 @@ export class ClinicController {
   }
 
   @Get("/:id")
-  async findOne(@Param("id") id: string): Promise<ClinicEntity | null> {
+  async findOne(@Param("id") id: string): Promise<ClinicEntity> {
     return await this.clinicService.findOne(id);
+  }
+
+  @Post("/create")
+  async create(@Body() setupDto: SetupDTO) {
+    return await this.clinicService.create(setupDto);
   }
 }

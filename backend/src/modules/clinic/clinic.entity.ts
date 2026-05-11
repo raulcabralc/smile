@@ -1,3 +1,4 @@
+import { AddressDTO } from "./types/dtos/address.dto";
 import { SystemPlan } from "./types/enums/system-plan.enum";
 import { Address } from "./types/interfaces/address.interface";
 import { Marker } from "./types/interfaces/marker.interface";
@@ -14,7 +15,7 @@ export class ClinicEntity {
   cnpj!: string;
   systemPlan!: SystemPlan;
   phone!: string;
-  address!: Address;
+  address!: Address | AddressDTO;
   markers!: Marker[];
   imageUrl!: string;
 

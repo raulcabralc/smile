@@ -22,7 +22,14 @@ export class UserService {
   ) {}
 
   async findAll(user: UserPayload): Promise<UserEntity[]> {
-    return await this.userRepository.findAll(user.clinicId);
+    const result = await this.userRepository.findAll(user.clinicId);
+
+    if (!result)
+      throw new ServiceUnavailableException(
+        "Unexpected database error. Please, try again.",
+      );
+
+    return result;
   }
 
   async findOne(user: UserPayload, id: string): Promise<UserEntity> {
